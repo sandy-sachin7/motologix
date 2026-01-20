@@ -4,12 +4,15 @@
  * ScoreBreakdown Component
  *
  * Shows individual factor scores as horizontal bars.
+ * Now with expandable view to show all factors.
  */
 
+import { useState } from "react";
 import { useAppStore } from "@/store/app-store";
 import type { ScoredMotorcycle, FactorKey } from "@/types";
 import { FACTOR_METADATA } from "@/types";
 import { getScoreBreakdown } from "@/engine/scoring";
+import { Button } from "@/components/ui/button";
 
 // Score color based on value
 function getScoreColor(score: number): string {
@@ -37,15 +40,17 @@ function ConfidenceDot({ confidence }: { confidence: "high" | "medium" | "low" }
 
 interface ScoreBreakdownProps {
   scoredBike: ScoredMotorcycle;
-  showAll?: boolean;
+  initiallyExpanded?: boolean;
 }
 
-export function ScoreBreakdown({ scoredBike, showAll = false }: ScoreBreakdownProps) {
+export function ScoreBreakdown({ scoredBike, initiallyExpanded = false }: ScoreBreakdownProps) {
+  const [isExpanded, setIsExpanded] = useState(initiallyExpanded);
   const weights = useAppStore((state) => state.weights);
   const breakdown = getScoreBreakdown(scoredBike, weights);
 
-  // Show top 5 by default, or all if showAll is true
-  const displayItems = showAll ? breakdown : breakdown.slice(0, 5);
+  // Show top 5 by default, or all if expanded
+  const displayItems = isExpanded ? breakdown : breakdown.slice(0, 5);
+  const hiddenCount = breakdown.length - 5;
 
   return (
     <div className="space-y-2">
@@ -65,7 +70,7 @@ export function ScoreBreakdown({ scoredBike, showAll = false }: ScoreBreakdownPr
                 <span className="font-medium w-8 text-right">{item.score}</span>
               </div>
             </div>
-            <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
               <div
                 className={`h-full ${getScoreColor(item.score)} transition-all duration-500`}
                 style={{ width: `${item.score * 10}%` }}
@@ -75,10 +80,24 @@ export function ScoreBreakdown({ scoredBike, showAll = false }: ScoreBreakdownPr
         ))}
       </div>
 
-      {!showAll && breakdown.length > 5 && (
-        <p className="text-xs text-muted-foreground text-center">
-          +{breakdown.length - 5} more factors
-        </p>
+      {/* Expandable toggle */}
+      {hiddenCount > 0 && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full text-xs hover:bg-muted"
+        >
+          {isExpanded ? (
+            <>
+              <span className="mr-1">▲</span> Show less
+            </>
+          ) : (
+            <>
+              <span className="mr-1">▼</span> +{hiddenCount} more factors
+            </>
+          )}
+        </Button>
       )}
     </div>
   );
