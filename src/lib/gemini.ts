@@ -41,8 +41,8 @@ export function isGeminiConfigured(): boolean {
 // MODEL CONFIGURATION
 // ============================================
 
-const DISCOVERY_MODEL = "gemini-2.0-flash";
-const REASONING_MODEL = "gemini-2.0-flash";
+const DISCOVERY_MODEL = "gemini-2.5-flash-preview-09-2025";
+const REASONING_MODEL = "gemini-2.5-flash-preview-09-2025";
 
 // ============================================
 // PROMPTS
