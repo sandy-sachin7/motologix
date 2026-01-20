@@ -8,3 +8,6 @@ export { PillionToggle } from "./PillionToggle";
 export { ResultsGrid } from "./ResultsGrid";
 export { ScoreBreakdown, CompactScoreBreakdown } from "./ScoreBreakdown";
 export { Explanation } from "./Explanation";
+export { RadarChart } from "./RadarChart";
+export { ExportButton } from "./ExportButton";
+

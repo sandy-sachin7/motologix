@@ -13,6 +13,8 @@ import {
   PillionToggle,
   ResultsGrid,
   Explanation,
+  RadarChart,
+  ExportButton,
 } from "@/components/motologix";
 import { useAppStore } from "@/store/app-store";
 import { Button } from "@/components/ui/button";
@@ -36,6 +38,7 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <ExportButton />
             {scoredMotorcycles.length > 0 && (
               <Button variant="ghost" size="sm" onClick={reset}>
                 Start Over
@@ -65,6 +68,9 @@ export default function Home() {
             {/* Explanation */}
             <Explanation />
 
+            {/* Radar Chart */}
+            <RadarChart />
+
             {/* Results Grid */}
             <ResultsGrid />
           </div>
@@ -88,3 +94,4 @@ export default function Home() {
     </div>
   );
 }
+
