@@ -5,6 +5,7 @@
  *
  * Input for searching and adding bikes to compare.
  * Shows added bikes as chips that can be removed.
+ * Animated with Framer Motion.
  */
 
 import { useState, KeyboardEvent } from "react";
@@ -13,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function BikeSearch() {
   const [query, setQuery] = useState("");
@@ -41,14 +43,14 @@ export function BikeSearch() {
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full glass-card hover:none transition-none">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <span className="text-2xl">🏍️</span>
+        <CardTitle className="flex items-center gap-2 font-heading">
+          <span className="text-2xl animate-pulse-soft">🏍️</span>
           Search Motorcycles
         </CardTitle>
         <CardDescription>
-          Enter motorcycle names to compare (e.g., "KTM Duke 390", "Royal Enfield Himalayan")
+          Enter motorcycle names to compare (e.g., "KTM Duke 390", "Himalayan 450")
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -61,45 +63,58 @@ export function BikeSearch() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={isDiscovering || bikeQueries.length >= 5}
-            className="flex-1"
+            className="flex-1 bg-background/50 backdrop-blur-sm border-border/50 focus:ring-primary/20"
           />
           <Button
             onClick={handleAdd}
             disabled={!query.trim() || isDiscovering || bikeQueries.length >= 5}
             variant="outline"
+            className="hover:bg-primary/10 hover:text-primary transition-colors"
           >
             Add
           </Button>
         </div>
 
         {/* Bike Chips */}
-        {bikeQueries.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 min-h-[32px]">
+          <AnimatePresence mode="popLayout">
             {bikeQueries.map((bike) => (
-              <Badge
+              <motion.div
                 key={bike}
-                variant="secondary"
-                className="px-3 py-1 text-sm flex items-center gap-2"
+                initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+                layout
               >
-                {bike}
-                <button
-                  onClick={() => removeBikeQuery(bike)}
-                  className="ml-1 hover:text-destructive"
-                  disabled={isDiscovering}
+                <Badge
+                  variant="secondary"
+                  className="px-3 py-1 text-sm flex items-center gap-2 bg-secondary/50 backdrop-blur-md border border-border/50"
                 >
-                  ×
-                </button>
-              </Badge>
+                  {bike}
+                  <button
+                    onClick={() => removeBikeQuery(bike)}
+                    className="ml-1 hover:text-destructive transition-colors rounded-full w-4 h-4 flex items-center justify-center hover:bg-destructive/10"
+                    disabled={isDiscovering}
+                  >
+                    ×
+                  </button>
+                </Badge>
+              </motion.div>
             ))}
-          </div>
-        )}
+          </AnimatePresence>
+        </div>
 
         {/* Info/Limits */}
-        <div className="text-sm text-muted-foreground">
-          {bikeQueries.length === 0 ? (
-            "Add at least 1 bike to get started"
-          ) : (
-            `${bikeQueries.length}/5 bikes added`
+        <div className="text-sm text-muted-foreground flex justify-between items-center">
+          <span>
+            {bikeQueries.length === 0 ? (
+              "Add at least 1 bike to get started"
+            ) : (
+              `${bikeQueries.length}/5 bikes added`
+            )}
+          </span>
+          {bikeQueries.length >= 5 && (
+            <span className="text-yellow-500 text-xs">Max limit reached</span>
           )}
         </div>
 
@@ -107,19 +122,29 @@ export function BikeSearch() {
         <Button
           onClick={handleDiscover}
           disabled={bikeQueries.length === 0 || isDiscovering}
-          className="w-full"
+          className="w-full relative overflow-hidden"
           size="lg"
         >
           {isDiscovering ? (
-            <>
-              <span className="animate-spin mr-2">⚙️</span>
-              Discovering...
-            </>
+            <div className="flex items-center gap-2">
+              <motion.span
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+              >
+                ⚙️
+              </motion.span>
+              <span>Discovering...</span>
+            </div>
           ) : (
-            <>
-              <span className="mr-2">🔍</span>
-              Compare {bikeQueries.length} Bike{bikeQueries.length !== 1 ? "s" : ""}
-            </>
+            <div className="flex items-center gap-2">
+              <motion.span
+                whileHover={{ scale: 1.2, rotate: -10 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                🔍
+              </motion.span>
+              <span>Compare {bikeQueries.length} Bike{bikeQueries.length !== 1 ? "s" : ""}</span>
+            </div>
           )}
         </Button>
       </CardContent>

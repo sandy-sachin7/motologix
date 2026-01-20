@@ -28,13 +28,13 @@ export interface Motorcycle {
   // Braking
   frontBrake: "disc" | "drum";
   rearBrake: "disc" | "drum";
-  absType: "none" | "single-channel" | "dual-channel";
+  absType: "none" | "single-channel" | "dual-channel" | "switchable-abs" | "cornering-abs";
   frontTyreWidth: number; // mm
   rearTyreWidth: number; // mm
 
   // Suspension
   frontSuspension: string;
-  rearSuspension: "monoshock" | "twin" | "other";
+  rearSuspension: string;
   rearSuspensionTravel?: number; // mm
 
   // Ergonomics
