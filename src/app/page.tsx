@@ -18,29 +18,31 @@ import {
 } from "@/components/motologix";
 import { useAppStore } from "@/store/app-store";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
   const reset = useAppStore((state) => state.reset);
   const scoredMotorcycles = useAppStore((state) => state.scoredMotorcycles);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-950 to-zinc-900">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 pattern-grid">
       {/* Header */}
-      <header className="border-b border-zinc-800 sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 glass border-b border-border/40">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">🏍️</span>
+            <span className="text-3xl animate-in">🏍️</span>
             <div>
-              <h1 className="text-xl font-bold text-white">Motologix</h1>
-              <p className="text-xs text-zinc-500">
+              <h1 className="text-xl font-bold font-heading tracking-tight">Motologix</h1>
+              <p className="text-xs text-muted-foreground hidden sm:block">
                 AI assists. Math decides. Humans approve.
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <ExportButton />
+            <ThemeToggle />
             {scoredMotorcycles.length > 0 && (
-              <Button variant="ghost" size="sm" onClick={reset}>
+              <Button variant="ghost" size="sm" onClick={reset} className="text-muted-foreground hover:text-primary">
                 Start Over
               </Button>
             )}
