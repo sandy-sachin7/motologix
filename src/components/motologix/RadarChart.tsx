@@ -4,34 +4,31 @@
  * RadarChart Component
  *
  * Visualizes factor scores as a radar/spider chart.
+ * Optimized for both light and dark modes with vibrant colors.
  */
 
 import { useAppStore } from "@/store/app-store";
-import type { ScoredMotorcycle, FactorKey } from "@/types";
+import type { FactorKey } from "@/types";
 import { FACTOR_METADATA } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
 import {
   Radar,
   RadarChart as RechartsRadarChart,
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
+  Legend,
   ResponsiveContainer,
+  Tooltip,
 } from "recharts";
 
-// Colors for different bikes
+// Vibrant colors that work in both light and dark modes
 const CHART_COLORS = [
-  "hsl(var(--chart-1))",
-  "hsl(var(--chart-2))",
-  "hsl(var(--chart-3))",
-  "hsl(var(--chart-4))",
-  "hsl(var(--chart-5))",
+  "#22c55e", // Green
+  "#3b82f6", // Blue
+  "#f59e0b", // Amber
+  "#ef4444", // Red
+  "#8b5cf6", // Purple
 ];
 
 interface RadarChartProps {
@@ -56,7 +53,7 @@ export function RadarChart({ showOnlyTop = 3 }: RadarChartProps) {
       fullLabel: factor.label,
     };
 
-    bikesToShow.forEach((bike, index) => {
+    bikesToShow.forEach((bike) => {
       const bikeName = `${bike.motorcycle.brand} ${bike.motorcycle.model}`;
       dataPoint[bikeName] = bike.factorScores[factor.key as FactorKey];
     });
@@ -64,65 +61,101 @@ export function RadarChart({ showOnlyTop = 3 }: RadarChartProps) {
     return dataPoint;
   });
 
-  // Chart config for shadcn chart
-  const chartConfig: ChartConfig = bikesToShow.reduce((config, bike, index) => {
-    const bikeName = `${bike.motorcycle.brand} ${bike.motorcycle.model}`;
-    config[bikeName] = {
-      label: bikeName,
-      color: CHART_COLORS[index % CHART_COLORS.length],
-    };
-    return config;
-  }, {} as ChartConfig);
-
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <span className="text-2xl">📊</span>
+    <Card className="w-full border-border/50 bg-card/50 backdrop-blur-sm">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <span>📊</span>
           Factor Comparison
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[400px]">
-          <RechartsRadarChart data={chartData}>
-            <PolarGrid gridType="polygon" />
-            <PolarAngleAxis
-              dataKey="factor"
-              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-            />
-            <PolarRadiusAxis
-              angle={30}
-              domain={[0, 10]}
-              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-            />
-            <ChartTooltip content={<ChartTooltipContent />} />
-            {bikesToShow.map((bike, index) => {
-              const bikeName = `${bike.motorcycle.brand} ${bike.motorcycle.model}`;
-              return (
-                <Radar
-                  key={bikeName}
-                  name={bikeName}
-                  dataKey={bikeName}
-                  stroke={CHART_COLORS[index % CHART_COLORS.length]}
-                  fill={CHART_COLORS[index % CHART_COLORS.length]}
-                  fillOpacity={0.2}
-                  strokeWidth={2}
-                />
-              );
-            })}
-          </RechartsRadarChart>
-        </ChartContainer>
+      <CardContent className="pb-4">
+        <div className="w-full h-[350px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <RechartsRadarChart data={chartData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+              <PolarGrid
+                gridType="polygon"
+                stroke="currentColor"
+                strokeOpacity={0.15}
+              />
+              <PolarAngleAxis
+                dataKey="factor"
+                tick={{
+                  fill: "currentColor",
+                  fontSize: 11,
+                  opacity: 0.7,
+                }}
+                tickLine={false}
+              />
+              <PolarRadiusAxis
+                angle={30}
+                domain={[0, 10]}
+                tick={{
+                  fill: "currentColor",
+                  fontSize: 10,
+                  opacity: 0.5,
+                }}
+                tickCount={6}
+                axisLine={false}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                }}
+                labelStyle={{ color: "hsl(var(--foreground))" }}
+              />
+              {bikesToShow.map((bike, index) => {
+                const bikeName = `${bike.motorcycle.brand} ${bike.motorcycle.model}`;
+                const color = CHART_COLORS[index % CHART_COLORS.length];
+                return (
+                  <Radar
+                    key={bikeName}
+                    name={bikeName}
+                    dataKey={bikeName}
+                    stroke={color}
+                    fill={color}
+                    fillOpacity={0.25}
+                    strokeWidth={2.5}
+                    dot={{
+                      r: 3,
+                      fill: color,
+                      strokeWidth: 0,
+                    }}
+                    activeDot={{
+                      r: 5,
+                      fill: color,
+                      stroke: "white",
+                      strokeWidth: 2,
+                    }}
+                  />
+                );
+              })}
+              <Legend
+                wrapperStyle={{ paddingTop: "20px" }}
+                formatter={(value: string) => (
+                  <span style={{ color: "currentColor", opacity: 0.9 }}>{value}</span>
+                )}
+              />
+            </RechartsRadarChart>
+          </ResponsiveContainer>
+        </div>
 
-        {/* Legend */}
-        <div className="flex flex-wrap justify-center gap-4 mt-4">
+        {/* Legend with scores */}
+        <div className="flex flex-wrap justify-center gap-4 mt-2 pt-2 border-t border-border/50">
           {bikesToShow.map((bike, index) => (
             <div key={bike.motorcycle.id} className="flex items-center gap-2">
               <div
-                className="w-3 h-3 rounded-full"
+                className="w-3 h-3 rounded-full shadow-sm"
                 style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
               />
-              <span className="text-sm">
-                {bike.motorcycle.brand} {bike.motorcycle.model} ({bike.finalScore})
+              <span className="text-sm font-medium">
+                {bike.motorcycle.brand} {bike.motorcycle.model}
+              </span>
+              <span className="text-sm text-muted-foreground">
+                ({bike.finalScore})
               </span>
             </div>
           ))}
