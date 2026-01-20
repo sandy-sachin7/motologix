@@ -48,17 +48,25 @@ This system is built for **long-term ownership decisions**, not impulse purchase
 
 ## 🏗️ Architecture
 
-```mermaid
-graph TD
-    User[User Input] -->|Bike Query| Discovery[Bike Discovery Agent]
-    Discovery -->|Gemini API| Processing[Spec Processor]
-    Processing -->|Raw Specs| Normalizer[Normalization Engine]
-    Normalizer -->|0-10 Scores| Scorer[Weighted Scoring Engine]
-    Scorer -->|Weights| UI[Results Dashboard]
-
-    UI -->|Render| Cards[Ranked Cards]
-    UI -->|Render| Radar[Radar Chart]
-    UI -->|Render| Explain[AI Explanation]
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         MOTOLOGIX                                │
+├─────────────────────────────────────────────────────────────────┤
+│  PRESENTATION LAYER (Next.js App Router)                        │
+│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐       │
+│  │ Bike      │ │ Weight    │ │ Results   │ │ Explain   │       │
+│  │ Search    │ │ Config    │ │ Dashboard │ │ View      │       │
+│  └───────────┘ └───────────┘ └───────────┘ └───────────┘       │
+├─────────────────────────────────────────────────────────────────┤
+│  AGENT LAYER                                                     │
+│  BikeDiscovery → DataNormalization → ScoringEngine → AIReasoning│
+├─────────────────────────────────────────────────────────────────┤
+│  CORE ENGINE (Deterministic - No AI)                            │
+│  ScoringEngine (Math Only) │ Normalizer (Rules) │ Validator     │
+├─────────────────────────────────────────────────────────────────┤
+│  AI LAYER (Gemini API - Labeled & Constrained)                  │
+│  BikeDiscovery │ SpecExtraction │ ExplanationGenerator          │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### Tech Stack
