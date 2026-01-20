@@ -111,11 +111,11 @@ function ResultCard({ scoredBike, isTop }: { scoredBike: ScoredMotorcycle; isTop
         <ScoreBreakdown scoredBike={scoredBike} />
 
         {/* Price if available */}
-        {bike.estimatedPrice && (
+        {bike.exShowroomPrice && (
           <div className="pt-2 border-t">
-            <span className="text-sm text-muted-foreground">Est. Price: </span>
+            <span className="text-sm text-muted-foreground">Ex-showroom: </span>
             <span className="font-medium">
-              ₹{(bike.estimatedPrice / 100000).toFixed(2)} Lakh
+              ₹{(bike.exShowroomPrice / 100000).toFixed(2)} Lakh
             </span>
           </div>
         )}

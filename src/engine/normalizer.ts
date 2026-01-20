@@ -319,10 +319,10 @@ export function scoreOwnershipPracticality(bike: Motorcycle): number {
   }
 
   // Price segment affects parts cost
-  if (bike.estimatedPrice) {
-    if (bike.estimatedPrice < 150000) score += 0.5;
-    else if (bike.estimatedPrice > 300000) score -= 0.5;
-    else if (bike.estimatedPrice > 500000) score -= 1;
+  if (bike.exShowroomPrice) {
+    if (bike.exShowroomPrice < 150000) score += 0.5;
+    else if (bike.exShowroomPrice > 300000) score -= 0.5;
+    else if (bike.exShowroomPrice > 500000) score -= 1;
   }
 
   return clamp(roundHalf(score), 1, 10);

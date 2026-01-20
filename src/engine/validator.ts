@@ -379,7 +379,7 @@ export function fillMissingData(bike: Partial<Motorcycle>): Motorcycle {
     rearSuspension: bike.rearSuspension || "twin",
     rearSuspensionTravel: bike.rearSuspensionTravel,
     handlebarType: bike.handlebarType,
-    estimatedPrice: bike.estimatedPrice,
+    exShowroomPrice: bike.exShowroomPrice,
     reviewSummary: bike.reviewSummary,
     heatManagementRating: bike.heatManagementRating,
     confidence: bike.confidence || "low",

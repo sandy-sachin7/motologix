@@ -4,13 +4,34 @@
  * POST /api/discover
  * Body: { queries: string[] }
  * Returns discovered motorcycle specifications
+ *
+ * Rate limited to 1000 requests per day (RPD)
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { smartDiscoverMotorcycles } from "@/agents/discovery";
+import {
+  isRateLimited,
+  incrementRequestCount,
+  getRateLimitStatus,
+  formatResetTime,
+} from "@/lib/rate-limiter";
 
 export async function POST(request: NextRequest) {
   try {
+    // Check rate limit
+    if (isRateLimited()) {
+      const status = getRateLimitStatus();
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Rate limit exceeded (1000/day). Resets in ${formatResetTime()}.`,
+          rateLimit: status,
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { queries } = body;
 
@@ -40,6 +61,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Increment rate limit counter (counts each API call, not each bike)
+    if (!incrementRequestCount()) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded while processing request" },
+        { status: 429 }
+      );
+    }
+
     // Discover motorcycles
     const result = await smartDiscoverMotorcycles(queries.map((q: string) => q.trim()));
 
@@ -53,6 +82,7 @@ export async function POST(request: NextRequest) {
           totalTime: result.totalTime,
         },
       },
+      rateLimit: getRateLimitStatus(),
     });
   } catch (error) {
     console.error("Discovery API error:", error);
@@ -68,6 +98,19 @@ export async function POST(request: NextRequest) {
 
 // Also support GET for single bike discovery
 export async function GET(request: NextRequest) {
+  // Check rate limit
+  if (isRateLimited()) {
+    const status = getRateLimitStatus();
+    return NextResponse.json(
+      {
+        success: false,
+        error: `Rate limit exceeded (1000/day). Resets in ${formatResetTime()}.`,
+        rateLimit: status,
+      },
+      { status: 429 }
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q");
 
@@ -75,6 +118,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { error: "Query parameter 'q' is required" },
       { status: 400 }
+    );
+  }
+
+  // Increment rate limit counter
+  if (!incrementRequestCount()) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded" },
+      { status: 429 }
     );
   }
 
@@ -92,5 +143,7 @@ export async function GET(request: NextRequest) {
     success: true,
     data: bikeResult.motorcycle,
     warnings: bikeResult.warnings,
+    rateLimit: getRateLimitStatus(),
   });
 }
+

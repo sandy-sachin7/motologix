@@ -52,19 +52,21 @@ const BIKE_DISCOVERY_PROMPT = `You are a motorcycle specification expert with ac
 
 Given a motorcycle name/query, extract and return ACCURATE specifications in JSON format. Use bikewale.com, zigwheels.com, and official manufacturer sites as reference sources.
 
-IMPORTANT RULES:
-1. Only return data you are confident about
+CRITICAL RULES:
+1. ONLY return data for the LATEST 2025 variant (or 2024 if 2025 is not yet available)
 2. If a specification is unknown, omit it or set to null
 3. Use metric units (mm, kg, bhp, Nm)
 4. For Indian market bikes, use Indian variant specs
 5. Be precise with ABS type (none, single-channel, dual-channel)
+6. Price MUST be EX-SHOWROOM price in INR (not on-road price)
+7. Always specify the variant name if multiple variants exist
 
 Return a JSON object with this structure:
 {
   "brand": "string",
   "model": "string",
-  "variant": "string (if applicable)",
-  "year": number,
+  "variant": "string (top/base variant name)",
+  "year": 2025 (or 2024 if 2025 not available),
   "engineCC": number,
   "power": number (bhp),
   "torque": number (Nm),
@@ -82,12 +84,13 @@ Return a JSON object with this structure:
   "rearSuspension": "monoshock" or "twin" or "other",
   "rearSuspensionTravel": number (mm, if known),
   "handlebarType": "clip-on" or "standard" or "raised",
-  "estimatedPrice": number (ex-showroom INR, approximate),
+  "exShowroomPrice": number (EX-SHOWROOM price in INR, NOT on-road),
   "confidence": "high" or "medium" or "low",
   "sources": ["list of sources used"]
 }
 
 Motorcycle query: `;
+
 
 const BIKE_EXPLANATION_PROMPT = `You are Motologix, an explainable motorcycle recommendation system. Your role is to explain WHY a motorcycle scored the way it did.
 
@@ -142,7 +145,7 @@ export interface BikeDiscoveryResult {
   rearSuspension: "monoshock" | "twin" | "other";
   rearSuspensionTravel?: number;
   handlebarType?: "clip-on" | "standard" | "raised";
-  estimatedPrice?: number;
+  exShowroomPrice?: number;
   confidence: "high" | "medium" | "low";
   sources: string[];
 }

@@ -41,7 +41,7 @@ export interface Motorcycle {
   handlebarType?: "clip-on" | "standard" | "raised";
 
   // Practical
-  estimatedPrice?: number; // INR
+  exShowroomPrice?: number; // Ex-showroom INR
 
   // AI-derived
   reviewSummary?: string;
