@@ -5,9 +5,10 @@
 An AI-powered, explainable motorcycle decision system that helps riders and families make rational, data-backed motorcycle choices through transparent scoring and AI-assisted explanations.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![Next.js](https://img.shields.io/badge/Next.js-14-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Tailwind](https://img.shields.io/badge/Tailwind-4-cyan)
+![Gemini](https://img.shields.io/badge/AI-Gemini_Flash-orange)
 
 ---
 
@@ -24,34 +25,50 @@ This system is built for **long-term ownership decisions**, not impulse purchase
 
 ---
 
+## ✨ Key Features (v1.0.0)
+
+### 🎨 Visuals & UI
+- **Award-Winning Design**: Glassmorphism, blurred cards, and premium gradients using `oklch` colors.
+- **Theme Support**: Seamless Light/Dark mode toggle with persistent preferences.
+- **Premium Animations**: Staggered entry animations, smooth hover states, and spring physics using Framer Motion.
+- **Responsive**: Fully responsive design for mobile, tablet, and desktop.
+
+### 🧠 Core Engine
+- **2025 Model Data**: Explicitly targets 2025 variants (e.g., KTM Duke 390 Gen 3, Himalayan 450).
+- **Smart Discovery**: Uses Google Gemini to find real specifications (power, torque, suspension, etc.).
+- **Deterministic Scoring**: 10 Weighted factors normalized to human-readable scores.
+- **Detailed Specs**: Tracks detailed specs like Cornering ABS, Suspension Travel, and Ex-showroom pricing.
+
+### 🛡️ Explainer Modes
+- **Why This Ranking?**: Technical breakdown of why a bike won based on math.
+- **Parent Mode 👨‍👩‍👧**: Toggles explanation to a simplified, safety-focused summary for family approval.
+- **Trade-offs**: Explicitly lists downsides (e.g., "Stiff suspension," "High heat in traffic").
+
+---
+
 ## 🏗️ Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         MOTOLOGIX                                │
-├─────────────────────────────────────────────────────────────────┤
-│  PRESENTATION LAYER (Next.js App Router)                        │
-│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐       │
-│  │ Bike      │ │ Weight    │ │ Results   │ │ Explain   │       │
-│  │ Search    │ │ Config    │ │ Dashboard │ │ View      │       │
-│  └───────────┘ └───────────┘ └───────────┘ └───────────┘       │
-├─────────────────────────────────────────────────────────────────┤
-│  AGENT LAYER                                                     │
-│  BikeDiscovery → DataNormalization → ScoringEngine → AIReasoning│
-├─────────────────────────────────────────────────────────────────┤
-│  CORE ENGINE (Deterministic - No AI)                            │
-│  ScoringEngine (Math Only) │ Normalizer (Rules) │ Validator     │
-├─────────────────────────────────────────────────────────────────┤
-│  AI LAYER (Gemini API - Labeled & Constrained)                  │
-│  BikeDiscovery │ SpecExtraction │ ExplanationGenerator          │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    User[User Input] -->|Bike Query| Discovery[Bike Discovery Agent]
+    Discovery -->|Gemini API| Processing[Spec Processor]
+    Processing -->|Raw Specs| Normalizer[Normalization Engine]
+    Normalizer -->|0-10 Scores| Scorer[Weighted Scoring Engine]
+    Scorer -->|Weights| UI[Results Dashboard]
+
+    UI -->|Render| Cards[Ranked Cards]
+    UI -->|Render| Radar[Radar Chart]
+    UI -->|Render| Explain[AI Explanation]
 ```
 
-### Key Principles
-
-1. **AI assists** - Gemini helps discover bikes and generate explanations
-2. **Math decides** - All scoring is deterministic with explicit formulas
-3. **Humans approve** - Every recommendation is explainable to parents/non-enthusiasts
+### Tech Stack
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4, shadcn/ui, Lucide Icons
+- **State**: Zustand (with persistence)
+- **AI**: Google Gemini Pro (via Vercel AI SDK patterns)
+- **Charts**: Recharts
+- **Animation**: Framer Motion
 
 ---
 
@@ -72,15 +89,7 @@ Each motorcycle is scored on a **1-10 scale** for these factors:
 | Ownership Practicality | 8% | Practicality |
 | Long-Term Suitability | 7% | Practicality |
 
-**Total: 100%** (weights are fully customizable)
-
-### Scoring Formula
-
-```
-Final Score = Σ(Factor Score × Factor Weight) × 10
-```
-
-All scores are normalized to a **0-100 scale** and fully auditable.
+**Total: 100%** (weights are fully customizable via sliders)
 
 ---
 
@@ -88,7 +97,7 @@ All scores are normalized to a **0-100 scale** and fully auditable.
 
 ### Prerequisites
 
-- Node.js 20+ or 22+
+- Node.js 20+
 - npm or yarn
 - Gemini API key ([get one here](https://aistudio.google.com/))
 
@@ -129,50 +138,6 @@ npm start
 
 ---
 
-## 📁 Project Structure
-
-```
-motologix/
-├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── page.tsx            # Main UI
-│   │   ├── layout.tsx          # Root layout
-│   │   └── api/                # API routes
-│   │       └── discover/       # Gemini discovery endpoint
-│   │
-│   ├── components/             # UI Components
-│   │   ├── ui/                 # shadcn/ui primitives
-│   │   └── motologix/          # App-specific components
-│   │
-│   ├── agents/                 # Agent Implementations
-│   │   ├── discovery.ts        # Bike discovery via Gemini
-│   │   ├── normalization.ts    # Spec → factor scores
-│   │   ├── scoring.ts          # Weighted scoring
-│   │   ├── reasoning.ts        # AI explanations
-│   │   └── sanity.ts           # Validation
-│   │
-│   ├── engine/                 # Core Deterministic Logic
-│   │   ├── scoring.ts          # Pure math scoring
-│   │   ├── normalizer.ts       # Normalization rules
-│   │   └── validator.ts        # Sanity checks
-│   │
-│   ├── lib/                    # Utilities
-│   │   ├── gemini.ts           # Gemini API client
-│   │   └── utils.ts            # Helpers
-│   │
-│   ├── store/                  # State Management
-│   │   └── app-store.ts        # Zustand store
-│   │
-│   └── types/                  # TypeScript Interfaces
-│       └── index.ts            # All type definitions
-│
-├── .env.example                # Environment template
-├── .env.local                  # Local environment (gitignored)
-└── package.json
-```
-
----
-
 ## 🤖 AI Usage Constraints
 
 ### AI is allowed to:
@@ -188,96 +153,6 @@ motologix/
 - ❌ Produce hype-driven language
 
 **Every AI-generated insight includes a confidence label** (High/Medium/Low).
-
----
-
-## 🎨 UI Features
-
-- **Dynamic Bike Search** - Real-time discovery via Gemini
-- **Weight Sliders** - Customize factor importance
-- **Pillion Toggle** - Switch between primary/secondary pillion modes
-- **Radar Charts** - Visual factor comparison
-- **Score Breakdown** - Detailed per-bike analysis
-- **"Why this bike?"** - Plain-language explanations
-- **Parent Mode** - Simplified explanations for non-enthusiasts
-- **PDF Export** - Downloadable comparison reports
-
----
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-npm run test
-
-# Type checking
-npm run type-check
-
-# Linting
-npm run lint
-```
-
----
-
-## 📝 How It Works
-
-### 1. Enter Bike Names
-Type one or more motorcycle names (e.g., "KTM Duke 390", "Royal Enfield Himalayan").
-
-### 2. Gemini Discovery
-The system uses Gemini Search to find real specifications:
-- Engine, power, torque, weight
-- Braking hardware and ABS type
-- Suspension configuration
-- Dimensions and ergonomics
-
-### 3. Normalization
-Raw specs are converted to human-relevant factor scores using deterministic rules:
-- Weight + wheelbase → low-speed handling score
-- Brake hardware + tyre size → braking confidence score
-- Seat height + suspension → pillion comfort score
-
-### 4. Scoring
-Mathematical scoring using your custom weights:
-```
-finalScore = Σ(factorScore × factorWeight) × 10
-```
-
-### 5. AI Explanation
-Gemini generates plain-language explanations:
-- Why this bike scored higher
-- What compromises exist
-- Parent-friendly summary
-
----
-
-## 🎯 Target User Profile
-
-**Primary User:** Sandy, Bangalore
-- **Daily Usage:** ~15 km in heavy traffic
-- **Highway Usage:** Regular (Bangalore–Ooty, Chennai, Hyderabad, Goa)
-- **Max Round Trip:** 1000+ km
-- **Ownership Horizon:** 9+ years
-- **Riding Style:** Smooth, assertive, control-focused
-
-**Pillion Considerations:**
-- Primary: Peer/girlfriend (comfort important)
-- Secondary: Parents (stability and safety perception critical)
-
----
-
-## 🛣️ Roadmap
-
-- [x] Project setup with Next.js 14
-- [x] TypeScript types and interfaces
-- [ ] Core scoring engine
-- [ ] Gemini API integration
-- [ ] State management (Zustand)
-- [ ] UI components
-- [ ] Charts and visualizations
-- [ ] AI explanations with Parent Mode
-- [ ] PDF export
-- [ ] Vercel deployment
 
 ---
 
@@ -304,7 +179,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 - **Gemini API** - For AI-powered bike discovery and explanations
 - **shadcn/ui** - For beautiful, accessible UI components
 - **Recharts** - For radar charts and visualizations
-- **bikewale.com** - Reference source for Indian motorcycle data
+- **Framer Motion** - For award-winning animations
 
 ---
 
